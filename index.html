@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>ഇംപോസ്റ്റർ · Mollywood Imposter</title>
+<meta name="theme-color" content="#14100d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14100d;
+    --bg-2: #1c1611;
+    --curtain: #6f1b28;
+    --curtain-2: #8a2434;
+    --gold: #c9a227;
+    --gold-bright: #e2c15a;
+    --cream: #f2e9d8;
+    --muted: #9c9082;
+    --crew: #3f7d5c;
+    --imposter: #b13a3a;
+    --radius: 20px;
+    --shadow: 0 20px 50px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #241a12 0%, transparent 60%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 6px),
+      var(--bg);
+    color:var(--cream);
+    font-family:'Manrope', sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+    overflow-x:hidden;
+  }
+  .stage{
+    width:100%;
+    max-width:440px;
+    min-height:min(760px, 92vh);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .screen{ display:none; flex-direction:column; flex:1; animation: rise .45s ease both; }
+  .screen.active{ display:flex; }
+  @keyframes rise{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+  h1,h2,h3{ font-family:'Fraunces', serif; margin:0; letter-spacing:.01em; }
+  .brand{
+    text-align:center;
+    padding: 6px 0 28px;
+  }
+  .brand .mark{
+    font-size:11px;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--gold);
+    display:block;
+    margin-bottom:6px;
+  }
+  .brand h1{
+    font-size: 34px;
+    font-weight:600;
+    color:var(--cream);
+  }
+  .brand h1 em{
+    font-style:normal;
+    color:var(--gold-bright);
+  }
+  .brand p{ color:var(--muted); font-size:14px; margin-top:6px; }
+
+  .card{
+    background: linear-gradient(180deg, var(--bg-2), #16110d);
+    border:1px solid rgba(201,162,39,0.18);
+    border-radius: var(--radius);
+    padding:22px;
+    box-shadow: var(--shadow);
+  }
+
+  label.field-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--muted);
+    margin-bottom:10px;
+    display:block;
+  }
+
+  .stepper{
+    display:flex; align-items:center; justify-content:space-between;
+    background: rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:14px;
+    padding: 6px;
+    margin-bottom:22px;
+  }
+  .stepper button{
+    width:44px; height:44px; border-radius:10px; border:none;
+    background: rgba(201,162,39,0.12); color:var(--gold-bright);
+    font-size:20px; font-weight:700; cursor:pointer;
+  }
+  .stepper button:active{ background: rgba(201,162,39,0.28); }
+  .stepper .count{ font-family:'Fraunces', serif; font-size:28px; }
+
+  .names{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; max-height:280px; overflow-y:auto; padding-right:2px;}
+  .name-row{ display:flex; align-items:center; gap:10px; }
+  .name-row .num{
+    width:26px; height:26px; border-radius:50%; background:var(--curtain);
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
+    color:var(--cream); flex-shrink:0;
+  }
+  .name-row input{
+    flex:1; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px; padding:12px 14px; color:var(--cream); font-size:15px; font-family:'Manrope';
+  }
+  .name-row input:focus{ outline:none; border-color:var(--gold); }
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:16px 20px; border-radius:14px; border:none; cursor:pointer;
+    font-family:'Manrope'; font-weight:700; font-size:15px; letter-spacing:.02em;
+    transition: transform .15s ease;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{ background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#1a1408; }
+  .btn-ghost{ background: transparent; border:1px solid rgba(201,162,39,0.35); color:var(--gold-bright); }
+  .btn-block{ width:100%; }
+  .btn-row{ display:flex; gap:10px; }
+
+  .footer-note{ text-align:center; color:var(--muted); font-size:12px; margin-top:16px; line-height:1.6; }
+
+  /* REVEAL SCREEN */
+  .pass-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; }
+  .pass-name{ text-align:center; }
+  .pass-name .to{ color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.2em; }
+  .pass-name h2{ font-size:30px; margin-top:6px; }
+
+  .ticket{
+    width:100%;
+    aspect-ratio: 3/4;
+    max-height: 380px;
+    perspective: 1400px;
+    cursor:pointer;
+  }
+  .ticket-inner{
+    position:relative; width:100%; height:100%;
+    transform-style: preserve-3d;
+    transition: transform .6s cubic-bezier(.2,.9,.25,1);
+  }
+  .ticket.flipped .ticket-inner{ transform: rotateY(180deg); }
+  .ticket-face{
+    position:absolute; inset:0; backface-visibility:hidden;
+    border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px; text-align:center;
+  }
+  .ticket-front{
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 10px, transparent 10px 20px),
+      linear-gradient(160deg, var(--curtain-2), var(--curtain) 60%, #4a1219);
+    border: 2px dashed rgba(226,193,90,0.35);
+  }
+  .ticket-front .reel{ font-size:44px; margin-bottom:14px; }
+  .ticket-front .tap{ font-family:'Fraunces', serif; font-size:20px; color:var(--gold-bright); }
+  .ticket-front .sub{ color: rgba(242,233,216,0.6); font-size:13px; margin-top:8px; }
+
+  .ticket-back{
+    transform: rotateY(180deg);
+    background: linear-gradient(180deg, #201911, #171310);
+    border: 1px solid rgba(201,162,39,0.4);
+  }
+  .role-tag{
+    font-size:11px; text-transform:uppercase; letter-spacing:.24em; padding:6px 14px;
+    border-radius:100px; margin-bottom:16px; font-weight:700;
+  }
+  .role-tag.crew{ background: rgba(63,125,92,0.18); color:#7fd4a8; }
+  .role-tag.imposter{ background: rgba(177,58,58,0.2); color:#ef8484; }
+  .movie-name{ font-family:'Fraunces', serif; font-size:26px; line-height:1.25; color:var(--cream); }
+  .hint-label{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.14em; margin-top:18px; margin-bottom:8px;}
+  .hint-text{ font-size:15px; color:var(--gold-bright); line-height:1.5; padding:0 6px; }
+
+  .pass-actions{ width:100%; display:flex; flex-direction:column; gap:10px; }
+  .progress{ display:flex; gap:6px; justify-content:center; margin-top:4px; }
+  .progress .dot{ width:7px; height:7px; border-radius:50%; background: rgba(255,255,255,0.12); }
+  .progress .dot.done{ background: var(--gold); }
+
+  /* DISCUSSION */
+  .discuss-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; text-align:center;}
+  .discuss-mark{ font-size:70px; }
+  .discuss-tip{ color:var(--muted); font-size:14px; line-height:1.7; max-width:300px; }
+  .discuss-tip b{ color:var(--gold-bright); font-weight:700; }
+
+  /* REVEAL RESULT */
+  .result-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center; }
+  .result-wrap .eyebrow{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.2em; }
+  .result-wrap .imposter-name{ font-family:'Fraunces', serif; font-size:38px; color:var(--imposter-glow, #ef8484); }
+  .result-card{ width:100%; padding:20px; }
+  .result-movie{ font-family:'Fraunces', serif; font-size:22px; margin-top:6px; }
+
+  select{
+    width:100%; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px; padding:12px 14px; color:var(--cream); font-size:15px; font-family:'Manrope'; margin-bottom:20px;
+  }
+
+  ::-webkit-scrollbar{ width:5px; }
+  ::-webkit-scrollbar-thumb{ background: rgba(201,162,39,0.3); border-radius:10px; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- SETUP SCREEN -->
+  <section class="screen active" id="screen-setup">
+    <div class="brand">
+      <span class="mark">Pass · Bluff · Guess</span>
+      <h1>Mollywood <em>Imposter</em></h1>
+      <p>Everyone gets the movie. One of you doesn't.</p>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Players</label>
+      <div class="stepper">
+        <button id="minusBtn" type="button">–</button>
+        <div class="count" id="playerCount">4</div>
+        <button id="plusBtn" type="button">+</button>
+      </div>
+
+      <label class="field-label">Names (optional)</label>
+      <div class="names" id="namesList"></div>
+
+      <label class="field-label">Round difficulty</label>
+      <select id="difficulty">
+        <option value="easy">Easy hint — imposter gets a clear clue</option>
+        <option value="hard">Hard hint — imposter gets a vague clue</option>
+      </select>
+
+      <button class="btn btn-primary btn-block" id="startBtn">Start Round →</button>
+    </div>
+
+    <p class="footer-note">Best played sitting in a circle, one phone.<br>3–10 players.</p>
+  </section>
+
+  <!-- PASS / REVEAL SCREEN -->
+  <section class="screen" id="screen-pass">
+    <div class="brand" style="padding-bottom:8px;">
+      <span class="mark">Round in progress</span>
+    </div>
+    <div class="pass-wrap">
+      <div class="pass-name">
+        <span class="to">Hand the phone to</span>
+        <h2 id="passPlayerName">Player 1</h2>
+      </div>
+
+      <div class="ticket" id="ticket">
+        <div class="ticket-inner">
+          <div class="ticket-face ticket-front">
+            <div class="reel">🎬</div>
+            <div class="tap">Tap to reveal</div>
+            <div class="sub">Make sure no one else is looking</div>
+          </div>
+          <div class="ticket-face ticket-back">
+            <div class="role-tag" id="roleTag">CREW</div>
+            <div id="revealBody"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pass-actions">
+        <div class="progress" id="progressDots"></div>
+        <button class="btn btn-primary btn-block" id="nextPlayerBtn" disabled>Seen it — pass the phone</button>
+      </div>
+    </div>
+  </section>
+
+ 
+  <!-- DISCUSSION / TIMER SCREEN -->
+  <section class="screen" id="screen-discuss">
+    <div class="brand" style="padding-bottom:8px;">
+      <span class="mark">Everyone has seen their card</span>
+      <h1 style="font-size:26px;">Discuss &amp; describe</h1>
+      <p>Take turns saying one word or sentence about the movie. The imposter must bluff.</p>
+    </div>
+    <div class="discuss-wrap">
+      <div class="discuss-mark">🎙️</div>
+      <p class="discuss-tip">Go around the circle. Each player says <b>one</b> word or sentence about the movie — then vote out loud on who you think the imposter is.</p>
+    </div>
+    <button class="btn btn-primary btn-block" id="toVoteBtn">We're ready to reveal →</button>
+  </section>
+
+  <!-- RESULT SCREEN -->
+  <section class="screen" id="screen-result">
+    <div class="brand" style="padding-bottom:12px;">
+      <span class="mark">The truth comes out</span>
+    </div>
+    <div class="result-wrap">
+      <span class="eyebrow">The imposter was</span>
+      <h2 class="imposter-name" id="imposterName">—</h2>
+
+      <div class="card result-card">
+        <span class="eyebrow">Movie of the round</span>
+        <div class="result-movie" id="resultMovie">—</div>
+        <div class="hint-label" style="margin-top:14px;">Imposter's hint was</div>
+        <div class="hint-text" id="resultHint">—</div>
+      </div>
+
+      <div class="btn-row" style="width:100%; margin-top:6px;">
+        <button class="btn btn-ghost btn-block" id="newPlayersBtn">Change players</button>
+        <button class="btn btn-primary btn-block" id="playAgainBtn">New round →</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Movie database ----------
+  // Each hint is written to be usable by the imposter WITHOUT naming the film.
+  const MOVIES = [
+    { title: "Manichitrathazhu", hint: "A classic supernatural thriller centered on an old ancestral house and a locked room." },
+    { title: "Kireedam", hint: "A tragic drama about an honest young man dragged into violence he tried to avoid." },
+    { title: "Thoovanathumbikal", hint: "A tender, melancholic love story torn between two women, set to a famous soundtrack." },
+    { title: "Chithram", hint: "A comedy about a fake marriage that spirals into real complications." },
+    { title: "Perumazhakkalam", hint: "An emotional drama about a woman confronting the man responsible for her husband's death." },
+    { title: "Kumbalangi Nights", hint: "A heartfelt ensemble drama about four very different brothers sharing one broken-down house." },
+    { title: "Bangalore Days", hint: "A breezy coming-of-age story following three cousins starting new lives in a big city." },
+    { title: "Premam", hint: "A nostalgic romance told across three chapters of one man's life and loves." },
+    { title: "Drishyam", hint: "A tense thriller about a father going to extraordinary lengths to protect his family after a crime." },
+    { title: "Drishyam 2", hint: "A tense sequel where an old case resurfaces and a family's cover-up is tested again." },
+    { title: "Ustad Hotel", hint: "A warm story about a young man finding purpose while learning the family restaurant trade." },
+    { title: "Charlie", hint: "A whimsical road-story about a woman chasing the trail of a mysterious, free-spirited artist." },
+    { title: "Maheshinte Prathikaaram", hint: "A small-town comedy-drama about a photographer's quiet, stubborn quest for revenge." },
+    { title: "Angamaly Diaries", hint: "A raw, high-energy gang drama set entirely in one fiercely local small town." },
+    { title: "Ee.Ma.Yau.", hint: "A dark comedy-drama about a coastal family's chaotic scramble to arrange a grand funeral." },
+    { title: "Jallikattu", hint: "A frantic chase film about an entire village hunting an escaped animal through the night." },
+    { title: "Kurup", hint: "A slick period thriller inspired by the real hunt for one of the country's most wanted fugitives." },
+    { title: "Minnal Murali", hint: "A homegrown superhero origin story about an ordinary tailor struck by lightning." },
+    { title: "Nna Thaan Case Kodu", hint: "A satirical courtroom comedy sparked by one man's stubborn refusal to back down." },
+    { title: "2018", hint: "A disaster drama following ordinary people banding together during catastrophic floods." },
+    { title: "Romancham", hint: "A horror-comedy about a group of roommates whose ouija board session goes wrong." },
+    { title: "Bramayugam", hint: "A brooding black-and-white period horror set inside an isolated, cursed mansion." },
+    { title: "Manjummel Boys", hint: "A survival drama based on a real cave rescue during a group of friends' holiday trip." },
+    { title: "Aavesham", hint: "A wild gangster comedy about college friends who fall under a flamboyant local don's wing." },
+    { title: "Premalu", hint: "A light, funny slice-of-life romance between an awkward newcomer and a spirited local girl." },
+    { title: "RDX", hint: "A high-octane action film about three childhood friends reuniting to settle an old score." },
+    { title: "Lucifer", hint: "A political power-drama about a succession battle following a chief minister's sudden death." },
+    { title: "Pulimurugan", hint: "A big, larger-than-life action film about a forest guide feuding with a man-eating predator." },
+    { title: "Bheeshma Parvam", hint: "A stylish gangster-family saga steeped in old-school loyalty and rivalry." },
+    { title: "Marakkar: Arabikadalinte Simham", hint: "A grand period epic about a naval commander defending the coast from colonial invaders." },
+    { title: "Spadikam", hint: "A fiery drama about a rebellious son clashing with his strict, disciplinarian father." },
+    { title: "Devasuram", hint: "A larger-than-life drama about a proud feudal lord's dramatic fall and comeback." },
+    { title: "Aaraam Thampuran", hint: "A commercial action-drama about a mysterious stranger who takes over a troubled household." },
+    { title: "Narasimham", hint: "A mass action film about a wrongly-blamed man returning to reclaim his honor." },
+    { title: "Vellimoonga", hint: "A political satire about an ordinary man's absurd rise as an unlikely local leader." },
+    { title: "Anjaam Pathiraa", hint: "A moody crime-thriller following an investigator chasing a killer with a twisted method." },
+    { title: "Vikram (Malayalam co-lead)", hint: "A slick multi-starrer action-thriller unraveling a secretive vigilante killer plot." },
+    { title: "Nayattu", hint: "A tense chase drama about three police officers fleeing after an accidental death." },
+    { title: "Joji", hint: "A quiet, unsettling family drama loosely echoing a Shakespearean tragedy of ambition." },
+    { title: "Malik", hint: "A sprawling saga about a coastal community leader caught between loyalty and power." },
+    { title: "Kammatipaadam", hint: "A gritty gangland drama tracing childhood friends through decades of land and crime wars." },
+    { title: "Take Off", hint: "A tense survival drama based on nurses caught in a real overseas conflict zone." },
+    { title: "Uyare", hint: "An inspiring drama about a woman rebuilding her life and dream after a violent attack." },
+    { title: "Virus", hint: "A multi-thread medical drama tracking a real outbreak and the effort to contain it." },
+    { title: "Android Kunjappan Ver 5.25", hint: "A gentle sci-fi comedy about a stubborn old man bonding with a robot caretaker." },
+    { title: "Guppy", hint: "A tender coming-of-age story about a boy and his prized pet fish." },
+    { title: "Sudani from Nigeria", hint: "A warm comedy-drama about a local football team manager caring for an injured foreign player." },
+    { title: "Thondimuthalum Driksakshiyum", hint: "A slow-burn dark comedy built entirely around a stolen gold chain and its aftermath." },
+    { title: "Njan Prakashan", hint: "A comedy about a small-time con man forced to actually earn an honest opportunity abroad." },
+    { title: "Ayyappanum Koshiyum", hint: "A slow-building drama about an ego clash between a retired soldier and a proud policeman." },
+    { title: "Hridayam", hint: "A nostalgic coming-of-age romance following a young man from college through adulthood." },
+    { title: "Jana Gana Mana", hint: "A layered courtroom-thriller unpacking a professor's death and the system around it." },
+    { title: "Traffic", hint: "A tense real-time thriller about a race to transport a donor heart across the city." },
+    { title: "Amen", hint: "A quirky musical romance set around a church band in a sleepy small town." },
+    { title: "Ordinary", hint: "A comic drama built around a busload of strangers thrown together by chance." },
+    { title: "North 24 Kaatham", hint: "A gentle road-story about an obsessive-compulsive man forced out of his rigid routine." },
+    { title: "Salt N' Pepper", hint: "A light-hearted romance connecting two middle-aged food lovers through a wrong number." },
+    { title: "Big B", hint: "A stylish action-drama about a fixer using unconventional methods to solve family troubles." },
+    { title: "Pranchiyettan & the Saint", hint: "A comedy-drama about a proud businessman fixated on winning a national honor." },
+  ];
+
+  // ---------- State ----------
+  let state = {
+    players: ["Player 1", "Player 2", "Player 3", "Player 4"],
+    difficulty: "easy",
+    imposterIndex: 0,
+    movie: null,
+    currentReveal: 0,
+    revealed: []
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const screens = ["setup","pass","discuss","result"];
+  function showScreen(name){
+    screens.forEach(s => $("screen-"+s).classList.toggle("active", s === name));
+  }
+
+  // ---------- Setup screen ----------
+  function renderNames(){
+    const list = $("namesList");
+    list.innerHTML = "";
+    for(let i=0;i<state.players.length;i++){
+      const row = document.createElement("div");
+      row.className = "name-row";
+      row.innerHTML = `<div class="num">${i+1}</div><input type="text" maxlength="18" value="${state.players[i]}" data-idx="${i}">`;
+      list.appendChild(row);
+    }
+    list.querySelectorAll("input").forEach(inp=>{
+      inp.addEventListener("input", e=>{
+        const idx = +e.target.dataset.idx;
+        state.players[idx] = e.target.value.trim() || `Player ${idx+1}`;
+      });
+    });
+    $("playerCount").textContent = state.players.length;
+  }
+
+  $("plusBtn").addEventListener("click", ()=>{
+    if(state.players.length >= 10) return;
+    state.players.push(`Player ${state.players.length+1}`);
+    renderNames();
+  });
+  $("minusBtn").addEventListener("click", ()=>{
+    if(state.players.length <= 3) return;
+    state.players.pop();
+    renderNames();
+  });
+
+  $("startBtn").addEventListener("click", ()=>{
+    state.difficulty = $("difficulty").value;
+    beginRound(true);
+  });
+
+  // ---------- Round setup ----------
+  function beginRound(freshPlayers){
+    state.movie = MOVIES[Math.floor(Math.random()*MOVIES.length)];
+    state.imposterIndex = Math.floor(Math.random()*state.players.length);
+    state.currentReveal = 0;
+    state.revealed = new Array(state.players.length).fill(false);
+    renderPassScreen();
+    showScreen("pass");
+  }
+
+  function renderProgressDots(){
+    const wrap = $("progressDots");
+    wrap.innerHTML = "";
+    state.players.forEach((_, i)=>{
+      const d = document.createElement("div");
+      d.className = "dot" + (state.revealed[i] ? " done" : "");
+      wrap.appendChild(d);
+    });
+  }
+
+  function renderPassScreen(){
+    const i = state.currentReveal;
+    $("passPlayerName").textContent = state.players[i];
+    $("ticket").classList.remove("flipped");
+    $("nextPlayerBtn").disabled = true;
+    $("nextPlayerBtn").textContent = "Seen it — pass the phone";
+    renderProgressDots();
+
+    const isImposter = (i === state.imposterIndex);
+    const tag = $("roleTag");
+    const body = $("revealBody");
+    if(isImposter){
+      tag.textContent = "IMPOSTER";
+      tag.className = "role-tag imposter";
+      const hintText = state.difficulty === "hard"
+        ? vagueVersion(state.movie.hint)
+        : state.movie.hint;
+      body.innerHTML = `
+        <div class="movie-name" style="font-size:19px; color:var(--muted);">You don't know the movie.</div>
+        <div class="hint-label">Your only clue</div>
+        <div class="hint-text">${hintText}</div>
+      `;
+    } else {
+      tag.textContent = "CREW";
+      tag.className = "role-tag crew";
+      body.innerHTML = `
+        <div class="hint-label" style="margin-top:0;">The movie is</div>
+        <div class="movie-name">${state.movie.title}</div>
+      `;
+    }
+  }
+
+  // Slightly strips detail for "hard" mode so imposter has less to work with
+  function vagueVersion(hint){
+    const firstComma = hint.indexOf(",");
+    const firstAbout = hint.toLowerCase().indexOf(" about ");
+    if(firstAbout > -1){
+      return hint.slice(0, firstAbout) + ".";
+    }
+    if(firstComma > -1){
+      return hint.slice(0, firstComma) + ".";
+    }
+    return hint;
+  }
+
+  $("ticket").addEventListener("click", ()=>{
+    const t = $("ticket");
+    if(t.classList.contains("flipped")) return;
+    t.classList.add("flipped");
+    state.revealed[state.currentReveal] = true;
+    $("nextPlayerBtn").disabled = false;
+    renderProgressDots();
+  });
+
+  $("nextPlayerBtn").addEventListener("click", ()=>{
+    state.currentReveal++;
+    if(state.currentReveal >= state.players.length){
+      showScreen("discuss");
+    } else {
+      renderPassScreen();
+    }
+  });
+
+  // ---------- Reveal result ----------
+  $("toVoteBtn").addEventListener("click", ()=>{
+    $("imposterName").textContent = state.players[state.imposterIndex];
+    $("resultMovie").textContent = state.movie.title;
+    $("resultHint").textContent = state.movie.hint;
+    showScreen("result");
+  });
+
+  // ---------- Result screen ----------
+  $("playAgainBtn").addEventListener("click", ()=>{
+    beginRound(false);
+  });
+  $("newPlayersBtn").addEventListener("click", ()=>{
+    renderNames();
+    showScreen("setup");
+  });
+
+  // ---------- Init ----------
+  renderNames();
+})();
+</script>
+</body>
+</html>
