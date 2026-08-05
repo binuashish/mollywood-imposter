@@ -136,6 +136,17 @@
 
   .footer-note{ text-align:center; color:var(--muted); font-size:12px; margin-top:16px; line-height:1.6; }
 
+  .top-bar{ display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; }
+  .top-bar .mark{
+    font-size:11px; letter-spacing:.32em; text-transform:uppercase; color:var(--gold);
+  }
+  .stop-link{
+    background: rgba(177,58,58,0.14); border:1px solid rgba(177,58,58,0.4); color:#ef8484;
+    font-family:'Manrope'; font-weight:700; font-size:13px; letter-spacing:.03em;
+    padding:10px 16px; border-radius:100px; cursor:pointer;
+  }
+  .stop-link:active{ background: rgba(177,58,58,0.28); transform: scale(0.96); }
+
   /* REVEAL SCREEN */
   .pass-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; }
   .pass-name{ text-align:center; }
@@ -249,8 +260,9 @@
 
   <!-- PASS / REVEAL SCREEN -->
   <section class="screen" id="screen-pass">
-    <div class="brand" style="padding-bottom:8px;">
+    <div class="top-bar">
       <span class="mark">Round in progress</span>
+      <button class="stop-link" id="stopGameBtnPass" type="button">Stop game</button>
     </div>
     <div class="pass-wrap">
       <div class="pass-name">
@@ -280,10 +292,13 @@
   </section>
 
  
-  <!-- DISCUSSION / TIMER SCREEN -->
+  <!-- DISCUSSION SCREEN -->
   <section class="screen" id="screen-discuss">
-    <div class="brand" style="padding-bottom:8px;">
+    <div class="top-bar">
       <span class="mark">Everyone has seen their card</span>
+      <button class="stop-link" id="stopGameBtnDiscuss" type="button">Stop game</button>
+    </div>
+    <div class="brand" style="padding:0 0 8px; text-align:center;">
       <h1 style="font-size:26px;">Discuss &amp; describe</h1>
       <p>Take turns saying one word or sentence about the movie. The imposter must bluff.</p>
     </div>
@@ -520,6 +535,18 @@
       renderPassScreen();
     }
   });
+
+  // ---------- Stop game (keeps players & difficulty, clears round data) ----------
+  function stopGame(){
+    state.movie = null;
+    state.imposterIndex = 0;
+    state.currentReveal = 0;
+    state.revealed = new Array(state.players.length).fill(false);
+    renderNames();
+    showScreen("setup");
+  }
+  $("stopGameBtnPass").addEventListener("click", stopGame);
+  $("stopGameBtnDiscuss").addEventListener("click", stopGame);
 
   // ---------- Reveal result ----------
   $("toVoteBtn").addEventListener("click", ()=>{
