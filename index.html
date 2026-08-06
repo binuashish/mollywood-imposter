@@ -101,13 +101,16 @@
     padding: 6px;
     margin-bottom:22px;
   }
+  .stepper.small{ margin-bottom:8px; }
   .stepper button{
     width:44px; height:44px; border-radius:10px; border:none;
     background: rgba(201,162,39,0.12); color:var(--gold-bright);
     font-size:20px; font-weight:700; cursor:pointer;
   }
+  .stepper button:disabled{ opacity:0.35; cursor:default; }
   .stepper button:active{ background: rgba(201,162,39,0.28); }
   .stepper .count{ font-family:'Fraunces', serif; font-size:28px; }
+  .stepper-hint{ color:var(--muted); font-size:12px; margin-bottom:22px; }
 
   .names{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; max-height:280px; overflow-y:auto; padding-right:2px;}
   .name-row{ display:flex; align-items:center; gap:10px; }
@@ -210,7 +213,8 @@
   /* REVEAL RESULT */
   .result-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center; }
   .result-wrap .eyebrow{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.2em; }
-  .result-wrap .imposter-name{ font-family:'Fraunces', serif; font-size:38px; color:var(--imposter-glow, #ef8484); }
+  .imposter-names{ display:flex; flex-direction:column; gap:2px; }
+  .imposter-names .name{ font-family:'Fraunces', serif; font-size:32px; color:#ef8484; line-height:1.2; }
   .result-card{ width:100%; padding:20px; }
   .result-movie{ font-family:'Fraunces', serif; font-size:22px; margin-top:6px; }
 
@@ -246,6 +250,14 @@
       <label class="field-label">Names (optional)</label>
       <div class="names" id="namesList"></div>
 
+      <label class="field-label">Imposters</label>
+      <div class="stepper small">
+        <button id="imposterMinusBtn" type="button">–</button>
+        <div class="count" id="imposterCount">1</div>
+        <button id="imposterPlusBtn" type="button">+</button>
+      </div>
+      <p class="stepper-hint" id="imposterHint">1 imposter, 3 crew</p>
+
       <label class="field-label">Round difficulty</label>
       <select id="difficulty">
         <option value="easy">Easy hint — imposter gets a clear clue</option>
@@ -255,7 +267,7 @@
       <button class="btn btn-primary btn-block" id="startBtn">Start Round →</button>
     </div>
 
-    <p class="footer-note">Best played sitting in a circle, one phone.<br>3–10 players.</p>
+    <p class="footer-note">Best played sitting in a circle, one phone.<br>3–25 players.</p>
   </section>
 
   <!-- PASS / REVEAL SCREEN -->
@@ -315,8 +327,8 @@
       <span class="mark">The truth comes out</span>
     </div>
     <div class="result-wrap">
-      <span class="eyebrow">The imposter was</span>
-      <h2 class="imposter-name" id="imposterName">—</h2>
+      <span class="eyebrow" id="imposterEyebrow">The imposter was</span>
+      <div class="imposter-names" id="imposterNames"></div>
 
       <div class="card result-card">
         <span class="eyebrow">Movie of the round</span>
@@ -406,11 +418,16 @@
   let state = {
     players: ["Player 1", "Player 2", "Player 3", "Player 4"],
     difficulty: "easy",
-    imposterIndex: 0,
+    imposterCount: 1,
+    imposterIndices: [],
     movie: null,
     currentReveal: 0,
     revealed: []
   };
+
+  function maxImposters(playerCount){
+    return Math.max(1, Math.min(8, Math.floor(playerCount / 3)));
+  }
 
   const $ = (id) => document.getElementById(id);
   const screens = ["setup","pass","discuss","result"];
@@ -435,10 +452,22 @@
       });
     });
     $("playerCount").textContent = state.players.length;
+    renderImposterStepper();
+  }
+
+  function renderImposterStepper(){
+    const max = maxImposters(state.players.length);
+    if(state.imposterCount > max) state.imposterCount = max;
+    if(state.imposterCount < 1) state.imposterCount = 1;
+    $("imposterCount").textContent = state.imposterCount;
+    $("imposterMinusBtn").disabled = state.imposterCount <= 1;
+    $("imposterPlusBtn").disabled = state.imposterCount >= max;
+    const crew = state.players.length - state.imposterCount;
+    $("imposterHint").textContent = `${state.imposterCount} imposter${state.imposterCount>1?"s":""}, ${crew} crew · up to ${max} allowed`;
   }
 
   $("plusBtn").addEventListener("click", ()=>{
-    if(state.players.length >= 10) return;
+    if(state.players.length >= 25) return;
     state.players.push(`Player ${state.players.length+1}`);
     renderNames();
   });
@@ -448,15 +477,38 @@
     renderNames();
   });
 
+  $("imposterPlusBtn").addEventListener("click", ()=>{
+    const max = maxImposters(state.players.length);
+    if(state.imposterCount >= max) return;
+    state.imposterCount++;
+    renderImposterStepper();
+  });
+  $("imposterMinusBtn").addEventListener("click", ()=>{
+    if(state.imposterCount <= 1) return;
+    state.imposterCount--;
+    renderImposterStepper();
+  });
+
   $("startBtn").addEventListener("click", ()=>{
     state.difficulty = $("difficulty").value;
     beginRound(true);
   });
 
   // ---------- Round setup ----------
+  function pickImposterIndices(playerCount, count){
+    const pool = Array.from({length: playerCount}, (_, i) => i);
+    // Fisher-Yates shuffle
+    for(let i = pool.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, count);
+  }
+
   function beginRound(freshPlayers){
     state.movie = MOVIES[Math.floor(Math.random()*MOVIES.length)];
-    state.imposterIndex = Math.floor(Math.random()*state.players.length);
+    const count = Math.min(state.imposterCount, maxImposters(state.players.length));
+    state.imposterIndices = pickImposterIndices(state.players.length, count);
     state.currentReveal = 0;
     state.revealed = new Array(state.players.length).fill(false);
     renderPassScreen();
@@ -481,7 +533,7 @@
     $("nextPlayerBtn").textContent = "Seen it — pass the phone";
     renderProgressDots();
 
-    const isImposter = (i === state.imposterIndex);
+    const isImposter = state.imposterIndices.includes(i);
     const tag = $("roleTag");
     const body = $("revealBody");
     if(isImposter){
@@ -536,10 +588,10 @@
     }
   });
 
-  // ---------- Stop game (keeps players & difficulty, clears round data) ----------
+  // ---------- Stop game (keeps players, imposter count & difficulty, clears round data) ----------
   function stopGame(){
     state.movie = null;
-    state.imposterIndex = 0;
+    state.imposterIndices = [];
     state.currentReveal = 0;
     state.revealed = new Array(state.players.length).fill(false);
     renderNames();
@@ -550,7 +602,11 @@
 
   // ---------- Reveal result ----------
   $("toVoteBtn").addEventListener("click", ()=>{
-    $("imposterName").textContent = state.players[state.imposterIndex];
+    $("imposterEyebrow").textContent = state.imposterIndices.length > 1 ? "The imposters were" : "The imposter was";
+    const namesWrap = $("imposterNames");
+    namesWrap.innerHTML = state.imposterIndices
+      .map(idx => `<div class="name">${state.players[idx]}</div>`)
+      .join("");
     $("resultMovie").textContent = state.movie.title;
     $("resultHint").textContent = state.movie.hint;
     showScreen("result");
