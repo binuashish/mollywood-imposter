@@ -696,12 +696,16 @@
   });
 
   $("nextPlayerBtn").addEventListener("click", ()=>{
-    state.currentReveal++;
-    if(state.currentReveal >= state.players.length){
-      showScreen("discuss");
-    } else {
-      renderPassScreen();
-    }
+    $("ticket").classList.remove("flipped");
+    $("nextPlayerBtn").disabled = true;
+    setTimeout(()=>{
+      state.currentReveal++;
+      if(state.currentReveal >= state.players.length){
+        showScreen("discuss");
+      } else {
+        renderPassScreen();
+      }
+    }, 650);
   });
 
   // ---------- Stop game (keeps players, imposter count & difficulty, clears round data) ----------
